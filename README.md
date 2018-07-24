@@ -1,7 +1,7 @@
 
 # Drive Sabertooth Motor by Arduino using ROS
 
-This project is for driving custom 4-wheeled robot motors (with front steering via Stepper Motor + rear wheel drive with DC motor) by Arduino with ROS Twist cmd_vel messages. The rear wheel drive gets controlled via Arduino and a Sabertooth Motor Controller from Dimension Engineering. The front steering is controlled via a stepper motor driver. Sabertooth motor controlled by pin 11 which defined by first com posrts TX under 9600 baud rate, ROS keep communicate by second com port whose port is 0 and 1 as default as 57600 baud rate. 
+This project is for driving custom 4-wheeled robot motors (with front steering via Stepper Motor + rear wheel drive with DC motor) by Arduino with ROS Twist cmd_vel messages. The rear wheel drive gets controlled via Arduino and a Sabertooth Motor Controller from Dimension Engineering. The front steering is controlled via a stepper motor driver. Sabertooth motor controlled by pin 11 which defined by first com posrts TX under 9600 baud rate, ROS keep communicate by second com port whose port is 0 and 1 as default as 57600 baud rate. We create subcriber on Arduino to catch the cmd_vel messages from ROS network. Also we create a publisher to create and send stop message to ROS network. The stop messages will be sent even if there is no new cmd_vel message on ROS network in certain timeout period.
 
 ## How to Run
 
