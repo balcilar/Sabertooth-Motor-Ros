@@ -1,7 +1,7 @@
 
 # Drive Sabertooth Motor by Arduino using ROS
 
-This project is for driving custom 4-wheeled robot motors (with front steering via Stepper Motor + rear wheel drive with DC motor) by Arduino with ROS Twist cmd_vel messages. The rear wheel drive gets controlled via Arduino and a Sabertooth Motor Controller from Dimension Engineering. The front steering is controlled via a stepper motor driver.
+This project is for driving custom 4-wheeled robot motors (with front steering via Stepper Motor + rear wheel drive with DC motor) by Arduino with ROS Twist cmd_vel messages. The rear wheel drive gets controlled via Arduino and a Sabertooth Motor Controller from Dimension Engineering. The front steering is controlled via a stepper motor driver. Sabertooth motor controlled by pin 11 which defined by first com posrts TX under 9600 baud rate, ROS keep communicate by second com port whose port is 0 and 1 as default as 57600 baud rate. 
 
 ## How to Run
 
@@ -33,7 +33,7 @@ $ roscore
 ```
 in second terminal run rosserial to let the ros connect your arduino (pay attention to your port name)
 ```
-$ rosrun rosserial_python serial_node.py /dev/ttyACM1
+$ rosrun rosserial_python serial_node.py /dev/ttyACM1 _baud:=57600
 ```
 
 in third terminal open keyboard teleoperator. this teleoperator send ros messages to ros network
@@ -42,16 +42,16 @@ $ rosrun teleop_twist_keyboard teleop_twist_keyboard.py
 ```
 
 Now use this keys
-i : forward
-, : backward
-k : left
-l : right
+* i : forward
+* , : backward
+* k : left
+* j : right
 
 and also you can sue 
-o : both forward and right
-u : both forward and left 
-. : both backward and right
-m : both backward and left 
+* o : both forward and right
+* u : both forward and left 
+* . : both backward and right
+* m : both backward and left 
 
 
 
