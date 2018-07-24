@@ -1,10 +1,18 @@
 #include <ros.h>
 #include <geometry_msgs/Twist.h>
 #include <math.h>
-
+#include <std_msgs/String.h>
+#include <SoftwareSerial.h>
 #include <SabertoothSimplified.h>
 
-SabertoothSimplified ST;
+
+
+
+SoftwareSerial SWSerial(NOT_A_PIN, 11); // RX on no pin (unused), TX on pin 11 (to S1).
+SabertoothSimplified ST(SWSerial); // Use SWSerial as the serial port.
+
+SoftwareSerial portROS(0, 1);
+
 
 int pulPin = 3; // Pulse Pin for steering motor controller
 int dirPin = 5; // Direction Pin for steering motor controller
@@ -19,11 +27,24 @@ void cmdVelCallback(const geometry_msgs::Twist&);
 ros::NodeHandle handle;
 ros::Subscriber<geometry_msgs::Twist> subscriber("cmd_vel", &cmdVelCallback);
 
+geometry_msgs::Twist msg;
+ros::Publisher chatter_pub("cmd_vel", &msg);
+
+
 unsigned long lastData = 0;
 
+int cnt=0;
 
 void cmdVelCallback(const geometry_msgs::Twist &twist) 
 {
+  if (cnt%2==0)  
+    digitalWrite(2, HIGH); 
+  else                        
+    digitalWrite(2, LOW); 
+
+  cnt=cnt+1;
+
+    
   // this function is called as soon as there is any cmd_vel command in the ros network
   
   lastData = millis();
@@ -33,6 +54,8 @@ void cmdVelCallback(const geometry_msgs::Twist &twist)
   // this variable is given left/right velocity in range of [-1 +1]
   const float spin = twist.angular.z;
 
+   
+
   // give movement to forth/back direction
   vorwaerts(int(66*linear));
   
@@ -40,17 +63,11 @@ void cmdVelCallback(const geometry_msgs::Twist &twist)
   // if given command is right means spin is negative
   if (spin<0)
   {    
-    rechtsLenken(int(-100*spin),10);
-    //digitalWrite(2, HIGH);   
-    //delay(100);                      
-    //digitalWrite(2, LOW);        
+    rechtsLenken(int(-100*spin),10);       
   }
-  else
+  else if (spin>0)
   {
-    linksLenken(int(100*spin),10);
-    //digitalWrite(2, HIGH);   
-    //delay(500);                      
-    //digitalWrite(2, LOW);  
+    linksLenken(int(100*spin),10); 
   }
   
 }
@@ -58,7 +75,12 @@ void cmdVelCallback(const geometry_msgs::Twist &twist)
 
 void setup() {
 
-  pinMode(2, OUTPUT);
+  pinMode(2, OUTPUT);  
+
+  SWSerial.begin(9600);
+  portROS.begin(57600);
+  
+  
   
   pinMode(pulPin, OUTPUT);
   pinMode(dirPin, OUTPUT);
@@ -68,25 +90,29 @@ void setup() {
   digitalWrite(pulPin, LOW);
   digitalWrite(ledPin, LOW);
   digitalWrite(enblPin, LOW);
-  digitalWrite(dirPin, LOW);  
-  SabertoothTXPinSerial.begin(9600);  
+  digitalWrite(dirPin, LOW);   
+    
  
   digitalWrite(enblPin, HIGH);
   delay(100);
-  digitalWrite(enblPin, LOW);
+  digitalWrite(enblPin, LOW);  
   
-  handle.initNode();
+  handle.initNode();  
   handle.subscribe(subscriber);
+  handle.advertise(chatter_pub);
 
 }
 
-void loop() {
-  
+void loop() 
+{  
   handle.spinOnce();
 
   if(millis() - lastData >= CONTROL_TIMEOUT)
   {
-    standgas();
+    lastData=millis();
+    msg.linear.x = 0;
+    msg.angular.z = 0;    
+    chatter_pub.publish(&msg);
   }  
 
 }
@@ -134,4 +160,3 @@ int rueckwaerts(int rueck) {
 void standgas() {
   ST.motor(1,0);
 }
-
